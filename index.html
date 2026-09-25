@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONEMILE</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: Arial, Helvetica, sans-serif; background:#f5f5f5; color:#111; overflow-x:hidden; }
+button, input, textarea { font-family: inherit; }
+button { cursor:pointer; }
+
+.navbar { position:sticky; top:0; z-index:1000; width:100%; height:80px; background:#000; color:white; display:flex; align-items:center; justify-content:space-between; padding:0 5%; }
+.logo { font-size:34px; font-weight:1000; letter-spacing:-2px; color:white; text-decoration:none; }
+.nav-links { display:flex; align-items:center; gap:35px; list-style:none; }
+.nav-links a { color:white; text-decoration:none; font-size:15px; font-weight:700; text-transform:uppercase; }
+.nav-links a:hover { color:#aaa; }
+.cart-button { border:1px solid white; background:white; color:black; padding:12px 18px; border-radius:30px; font-weight:800; }
+.cart-button:hover { background:#ddd; }
+
+.hero { min-height:650px; background: linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.55)), url("https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1800") center/cover no-repeat; display:flex; align-items:center; padding:80px 6%; color:white; }
+.hero-content { max-width:900px; }
+.hero-small { font-size:14px; letter-spacing:5px; font-weight:bold; margin-bottom:20px; }
+.hero h1 { font-size:clamp(70px,12vw,170px); line-height:.8; letter-spacing:-10px; font-weight:1000; margin-bottom:35px; }
+.hero p { font-size:20px; max-width:600px; line-height:1.6; color:#ddd; }
+.hero-btn { display:inline-block; margin-top:35px; background:white; color:black; padding:17px 30px; border-radius:40px; text-decoration:none; font-weight:900; text-transform:uppercase; }
+
+.section { padding:100px 5%; }
+.section-title { display:flex; align-items:end; justify-content:space-between; gap:30px; margin-bottom:40px; }
+.section-title h2 { font-size:clamp(45px,7vw,90px); line-height:.85; letter-spacing:-5px; font-weight:1000; }
+.section-title p { max-width:400px; color:#666; line-height:1.6; }
+
+.shop-top { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:40px; flex-wrap:wrap; }
+.categories { display:flex; gap:10px; flex-wrap:wrap; }
+.category-btn { border:1px solid #111; background:white; padding:12px 20px; border-radius:30px; font-weight:700; transition:.2s; }
+.category-btn:hover, .category-btn.active { background:black; color:white; }
+.search { width:300px; padding:15px 20px; border:1px solid #ccc; border-radius:30px; outline:none; background:white; font-size:15px; }
+
+.products { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:25px; }
+.product { background:white; overflow:hidden; border-radius:4px; transition:.25s; border:1px solid #eee; }
+.product:hover { transform:translateY(-7px); box-shadow:0 20px 50px rgba(0,0,0,.12); }
+.product-image { width:100%; height:400px; display:block; object-fit:cover; object-position:center; }
+.product-info { padding:22px; }
+.product-category { color:#888; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+.product-name { font-size:19px; font-weight:900; margin-bottom:15px; min-height:45px; }
+.product-bottom { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.price { font-size:18px; font-weight:1000; }
+.add-btn { border:0; background:black; color:white; padding:12px 15px; border-radius:8px; font-weight:800; }
+.add-btn:hover { background:#333; }
+
+.big-text { background:#000; color:white; padding:100px 5%; overflow:hidden; }
+.big-text h2 { font-size:clamp(70px,14vw,210px); line-height:.75; letter-spacing:-12px; font-weight:1000; white-space:nowrap; }
+
+.about { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+.about-image { width:100%; height:600px; object-fit:cover; }
+.about-content h2 { font-size:clamp(50px,7vw,100px); line-height:.85; letter-spacing:-5px; margin-bottom:30px; }
+.about-content p { color:#666; line-height:1.8; font-size:17px; }
+
+footer { background:black; color:white; padding:70px 5%; }
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:50px; }
+footer h2 { font-size:50px; letter-spacing:-3px; margin-bottom:20px; }
+footer h3 { margin-bottom:15px; }
+footer p { color:#999; line-height:1.7; }
+footer a { display:block; color:#999; text-decoration:none; margin-bottom:10px; }
+footer a:hover { color:white; }
+
+.cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:2000; display:none; }
+.cart-overlay.show { display:block; }
+.cart { position:absolute; right:0; top:0; height:100%; width:min(500px,100%); background:white; padding:30px; overflow-y:auto; }
+.cart-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+.cart-header h2 { font-size:35px; }
+.close { border:0; background:black; color:white; width:40px; height:40px; border-radius:50%; font-size:20px; }
+.cart-item { display:grid; grid-template-columns:80px 1fr; gap:15px; border-bottom:1px solid #ddd; padding:15px 0; }
+.cart-item img { width:80px; height:100px; object-fit:cover; }
+.cart-item h4 { margin-bottom:7px; }
+.cart-price { font-weight:900; margin-bottom:10px; }
+.qty { display:flex; align-items:center; gap:10px; }
+.qty button { width:28px; height:28px; border:1px solid #ccc; background:white; border-radius:5px; }
+.remove { margin-top:10px; border:0; background:none; color:#d00; font-size:12px; }
+.cart-total { margin-top:30px; border-top:2px solid black; padding-top:20px; }
+.cart-total-row { display:flex; justify-content:space-between; font-size:22px; font-weight:900; margin-bottom:20px; }
+.checkout-btn { width:100%; padding:17px; border:0; background:black; color:white; border-radius:8px; font-size:16px; font-weight:900; }
+.empty { text-align:center; padding:70px 20px; color:#777; }
+
+.modal { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:3000; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal.show { display:flex; }
+.modal-box { width:100%; max-width:550px; background:white; padding:35px; border-radius:15px; max-height:90vh; overflow-y:auto; }
+.modal-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:25px; }
+.modal-top h2 { font-size:32px; }
+.form-group { margin-bottom:18px; }
+.form-group label { display:block; font-weight:800; margin-bottom:8px; }
+.form-group input, .form-group textarea { width:100%; padding:15px; border:1px solid #ccc; border-radius:8px; outline:none; font-size:15px; }
+.form-group textarea { height:100px; resize:vertical; }
+.submit-order { width:100%; padding:17px; background:black; color:white; border:0; border-radius:8px; font-weight:900; font-size:16px; }
+.message { padding:15px; margin-bottom:20px; border-radius:8px; display:none; font-weight:700; }
+.message.show { display:block; }
+
+@media (max-width:1100px) {
+  .products { grid-template-columns:repeat(3, minmax(0,1fr)); }
+  .product-image { height:350px; }
+  .nav-links { gap:20px; }
+}
+
+@media (max-width:800px) {
+  .navbar { height:70px; padding:0 20px; }
+  .logo { font-size:27px; }
+  .nav-links { display:none; }
+  .hero { min-height:570px; padding:60px 20px; }
+  .hero h1 { font-size:clamp(70px,23vw,120px); letter-spacing:-7px; }
+  .hero p { font-size:16px; }
+  .section { padding:70px 20px; }
+  .section-title { display:block; }
+  .section-title h2 { margin-bottom:25px; }
+  .products { grid-template-columns:repeat(2, minmax(0,1fr)); gap:15px; }
+  .product-image { height:330px; }
+  .product-info { padding:15px; }
+  .product-name { font-size:16px; min-height:auto; }
+  .product-bottom { display:block; }
+  .price { margin-bottom:12px; }
+  .add-btn { width:100%; }
+  .search { width:100%; }
+  .about { grid-template-columns:1fr; gap:35px; }
+  .about-image { height:450px; }
+  .footer-grid { grid-template-columns:1fr; gap:35px; }
+  .big-text { padding:70px 20px; }
+  .big-text h2 { font-size:22vw; letter-spacing:-7px; }
+}
+
+@media (max-width:500px) {
+  .products { grid-template-columns:1fr; gap:20px; }
+  .product-image { height:430px; }
+  .product-name { font-size:19px; }
+  .product-info { padding:20px; }
+  .hero { min-height:550px; }
+  .hero h1 { font-size:28vw; letter-spacing:-6px; }
+  .hero p { font-size:15px; }
+  .cart { padding:20px; }
+  .modal-box { padding:22px; }
+  .modal-top h2 { font-size:25px; }
+}
+</style>
+</head>
+
+<body>
+
+<header class="navbar">
+  <a href="#home" class="logo">ONEMILE</a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#shop">Shop</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="cart-button" onclick="openCart()">🛒 Savat <span id="cartCount">0</span></button>
+</header>
+
+<main>
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-small">NEW STREETWEAR</div>
+      <h1>ONE<br>MILE</h1>
+      <p>ONEMILE — zamonaviy oversize kiyimlar va streetwear uslubidagi yangi avlod brendi.</p>
+      <a href="#shop" class="hero-btn">Kolleksiyani ko‘rish</a>
+    </div>
+  </section>
+
+  <section class="section" id="shop">
+    <div class="section-title">
+      <h2>SHOP<br>COLLECTION</h2>
+      <p>O‘zingizga mos kiyimni tanlang. Futbolka, hudi va shimlar — barchasi ONEMILE uslubida.</p>
+    </div>
+
+    <div class="shop-top">
+      <div class="categories">
+        <button class="category-btn active" onclick="setCategory('all', this)">Hammasi</button>
+        <button class="category-btn" onclick="setCategory('Futbolka', this)">Futbolka</button>
+        <button class="category-btn" onclick="setCategory('Hudi', this)">Hudi</button>
+        <button class="category-btn" onclick="setCategory('Shim', this)">Shim</button>
+      </div>
+      <input type="text" id="search" class="search" placeholder="Mahsulot qidirish..." oninput="renderProducts()">
+    </div>
+
+    <div class="products" id="productGrid"></div>
+  </section>
+
+  <section class="big-text">
+    <h2>WEAR<br>YOUR<br>WAY</h2>
+  </section>
+
+  <section class="section" id="about">
+    <div class="about">
+      <img class="about-image" src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=1200" alt="ONEMILE" loading="lazy">
+      <div class="about-content">
+        <h2>ABOUT<br>ONEMILE</h2>
+        <p>ONEMILE — oddiy kiyim emas. Bu o‘z uslubingni ko‘rsatish, o‘z yo‘lingdan yurish va boshqalardan ajralib turish.</p>
+        <br>
+        <p>Biz zamonaviy oversize streetwear kiyimlarini yaratamiz. Minimal dizayn, kuchli ko‘rinish va qulaylik — ONEMILE falsafasi.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="footer-grid">
+    <div>
+      <h2>ONEMILE</h2>
+      <p>Streetwear for the next generation.</p>
+    </div>
+    <div>
+      <h3>MENU</h3>
+      <a href="#home">Home</a>
+      <a href="#shop">Shop</a>
+      <a href="#about">About</a>
+    </div>
+    <div>
+      <h3>CONTACT</h3>
+      <p>Telegram: @onemile</p>
+      <p>Instagram: @onemile</p>
+    </div>
+  </div>
+</footer>
+
+<!-- CART -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCartOutside(event)">
+  <div class="cart" onclick="event.stopPropagation()">
+    <div class="cart-header">
+      <h2>Savat</h2>
+      <button class="close" onclick="closeCart()">×</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="cart-total">
+      <div class="cart-total-row">
+        <span>Jami:</span>
+        <span id="cartTotal">0 so'm</span>
+      </div>
+      <button class="checkout-btn" onclick="openOrder()">BUYURTMA BERISH</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="modal" id="orderModal">
+  <div class="modal-box">
+    <div class="modal-top">
+      <h2>Buyurtma</h2>
+      <button class="close" onclick="closeOrder()">×</button>
+    </div>
+    <div class="message" id="orderMessage"></div>
+    <form id="orderForm">
+      <div class="form-group">
+        <label>Ismingiz</label>
+        <input type="text" name="name" placeholder="Ismingizni kiriting" required>
+      </div>
+      <div class="form-group">
+        <label>Telefon</label>
+        <input type="text" name="phone" placeholder="+998 90 123 45 67" required>
+      </div>
+      <div class="form-group">
+        <label>Manzil</label>
+        <input type="text" name="address" placeholder="Yetkazib berish manzili" required>
+      </div>
+      <div class="form-group">
+        <label>Izoh</label>
+        <textarea name="comment" placeholder="Qo‘shimcha izoh..."></textarea>
+      </div>
+      <button type="submit" class="submit-order">BUYURTMA YUBORISH</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const products = [
+  { id:1, name:"ONEMILE Oversize Black T-Shirt", category:"Futbolka", price:99000, image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900" },
+  { id:2, name:"ONEMILE Premium Hoodie", category:"Hudi", price:189000, image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=900" },
+  { id:3, name:"ONEMILE Classic Jeans", category:"Shim", price:179000, image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=900" },
+  { id:4, name:"ONEMILE White T-Shirt", category:"Futbolka", price:89000, image:"https://images.unsplash.com/photo-1583743814966-8936f37f4678?w=900" },
+  { id:5, name:"ONEMILE Grey Hoodie", category:"Hudi", price:199000, image:"https://images.unsplash.com/photo-1509942774463-acf339cf87d5?w=900" },
+  { id:6, name:"ONEMILE Cargo Pants", category:"Shim", price:219000, image:"https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=900" },
+  { id:7, name:"ONEMILE Street T-Shirt", category:"Futbolka", price:109000, image:"https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=900" },
+  { id:8, name:"ONEMILE Black Zip Hoodie", category:"Hudi", price:229000, image:"https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=900" },
+  { id:9, name:"ONEMILE Blue Denim", category:"Shim", price:189000, image:"https://images.unsplash.com/photo-1548883354-7622d03aca27?w=900" },
+  { id:10, name:"ONEMILE Basic T-Shirt", category:"Futbolka", price:79000, image:"https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=900" },
+  { id:11, name:"ONEMILE Street Hoodie", category:"Hudi", price:179000, image:"https://images.unsplash.com/photo-1578681994506-b8f463449011?w=900" },
+  { id:12, name:"ONEMILE Relax Pants", category:"Shim", price:159000, image:"https://images.unsplash.com/photo-1517438476312-10d79c077509?w=900" }
+];
+
+let cart = JSON.parse(localStorage.getItem("onemile_cart") || "[]");
+let currentCategory = "all";
+
+function money(number) {
+  return number.toLocaleString("uz-UZ") + " so'm";
+}
+
+function renderProducts() {
+  const search = document.getElementById("search").value.toLowerCase().trim();
+  const filtered = products.filter(function(product) {
+    const categoryMatch = currentCategory === "all" || product.category === currentCategory;
+    const searchMatch = product.name.toLowerCase().includes(search);
+    return categoryMatch && searchMatch;
+  });
+
+  const productGrid = document.getElementById("productGrid");
+
+  if (filtered.length === 0) {
+    productGrid.innerHTML = `<div style="grid-column:1/-1;padding:80px 20px;text-align:center;font-size:25px;font-weight:800;">Mahsulot topilmadi.</div>`;
+    return;
+  }
+
+  let html = "";
+  filtered.forEach(function(product) {
+    html += `
+      <div class="product">
+        <img class="product-image" src="${product.image}" alt="${product.name}" loading="lazy">
+        <div class="product-info">
+          <div class="product-category">${product.category}</div>
+          <div class="product-name">${product.name}</div>
+          <div class="product-bottom">
+            <div class="price">${money(product.price)}</div>
+            <button class="add-btn" onclick="addToCart(${product.id})">🛒 Qo‘shish</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  productGrid.innerHTML = html;
+}
+
+function setCategory(category, button) {
+  currentCategory = category;
+  document.querySelectorAll(".category-btn").forEach(function(btn) { btn.classList.remove("active"); });
+  button.classList.add("active");
+  renderProducts();
+}
+
+function addToCart(id) {
+  const item = cart.find(function(item) { return item.id === id; });
+  if (item) { item.qty++; } else { cart.push({ id:id, qty:1 }); }
+  saveCart();
+  updateCart();
+  openCart();
+}
+
+function saveCart() {
+  localStorage.setItem("onemile_cart", JSON.stringify(cart));
+}
+
+function updateCart() {
+  const cartItems = document.getElementById("cartItems");
+  const cartCount = document.getElementById("cartCount");
+  const cartTotal = document.getElementById("cartTotal");
+
+  let count = 0;
+  let total = 0;
+
+  if (cart.length === 0) {
+    cartItems.innerHTML = `
+      <div class="empty">
+        <div style="font-size:50px;margin-bottom:20px;">🛒</div>
+        <h3>Savat bo‘sh</h3>
+        <p>Hali mahsulot qo‘shilmagan.</p>
+      </div>
+    `;
+    cartCount.textContent = "0";
+    cartTotal.textContent = "0 so'm";
+    return;
+  }
+
+  let html = "";
+  cart.forEach(function(item) {
+    const product = products.find(function(product) { return product.id === item.id; });
+    if (!product) return;
+
+    const sum = product.price * item.qty;
+    count += item.qty;
+    total += sum;
+
+    html += `
+      <div class="cart-item">
+        <img src="${product.image}" alt="${product.name}">
+        <div>
+          <h4>${product.name}</h4>
+          <div class="cart-price">${money(product.price)}</div>
+          <div class="qty">
+            <button onclick="changeQty(${product.id}, -1)">−</button>
+            <strong>${item.qty}</strong>
+            <button onclick="changeQty(${product.id}, 1)">+</button>
+          </div>
+          <button class="remove" onclick="removeFromCart(${product.id})">O‘chirish</button>
+        </div>
+      </div>
+    `;
+  });
+
+  cartItems.innerHTML = html;
+  cartCount.textContent = count;
+  cartTotal.textContent = money(total);
+}
+
+function changeQty(id, amount) {
+  const item = cart.find(function(item) { return item.id === id; });
+  if (!item) return;
+  item.qty += amount;
+  if (item.qty <= 0) {
+    cart = cart.filter(function(item) { return item.id !== id; });
+  }
+  saveCart();
+  updateCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(function(item) { return item.id !== id; });
+  saveCart();
+  updateCart();
+}
+
+function openCart() {
+  document.getElementById("cartOverlay").classList.add("show");
+}
+
+function closeCart() {
+  document.getElementById("cartOverlay").classList.remove("show");
+}
+
+function closeCartOutside(event) {
+  if (event.target.id === "cartOverlay") { closeCart(); }
+}
+
+function openOrder() {
+  if (cart.length === 0) {
+    alert("Avval savatga mahsulot qo‘shing!");
+    return;
+  }
+  closeCart();
+  document.getElementById("orderModal").classList.add("show");
+}
+
+function closeOrder() {
+  document.getElementById("orderModal").classList.remove("show");
+}
+
+document.getElementById("orderForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const form = event.target;
+  const formData = new FormData(form);
+
+  const payload = {
+    name: formData.get("name"),
+    phone: formData.get("phone"),
+    address: formData.get("address"),
+    comment: formData.get("comment"),
+    cart: cart
+  };
+
+  const message = document.getElementById("orderMessage");
+  message.classList.remove("show");
+
+  const button = form.querySelector(".submit-order");
+  button.disabled = true;
+  button.textContent = "YUBORILMOQDA...";
+
+  try {
+    const response = await fetch("/.netlify/functions/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    message.textContent = result.message;
+    message.classList.add("show");
+
+    if (result.success) {
+      message.style.background = "#d8ffd8";
+      message.style.color = "#087a08";
+      cart = [];
+      saveCart();
+      updateCart();
+      form.reset();
+      setTimeout(function() {
+        closeOrder();
+        message.classList.remove("show");
+      }, 2000);
+    } else {
+      message.style.background = "#ffd8d8";
+      message.style.color = "#b00000";
+    }
+  } catch (error) {
+    message.textContent = "Server bilan bog‘lanishda xatolik!";
+    message.style.background = "#ffd8d8";
+    message.style.color = "#b00000";
+    message.classList.add("show");
+  }
+
+  button.disabled = false;
+  button.textContent = "BUYURTMA YUBORISH";
+});
+
+renderProducts();
+updateCart();
+</script>
+
+</body>
+</html>
